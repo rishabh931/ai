@@ -116,24 +116,30 @@ if symbol:
                 st.plotly_chart(fig3, use_container_width=True)
                 
             with col2:
+                # Handle NaN values in EPS Growth
+                eps_growth = financials['EPS Growth %'].fillna(0)
+                
                 fig4 = px.bar(
                     financials, 
                     x=financials.index.year, 
                     y='EPS Growth %',
                     title="EPS Growth Percentage",
-                    color=np.where(financials['EPS Growth %'] > 0, 'green', 'red')
+                    color=np.where(eps_growth > 0, 'green', 'red')
                 )
                 st.plotly_chart(fig4, use_container_width=True)
             
             # Profitability Analysis
             st.subheader("🔍 Key Insights")
             eps_growth = financials['EPS Growth %'].mean()
-            tax_efficiency = (1 - (financials['PAT'] / financials['PBT']).mean() * 100
             
+            # Fixed tax efficiency calculation
+            conversion_ratio = (financials['PAT'] / financials['PBT']).mean()
+            tax_efficiency = (1 - conversion_ratio) * 100
+
             st.markdown(f"""
             - **EPS Growth**: {eps_growth:.1f}% average annual increase
             - **Tax Efficiency**: {tax_efficiency:.1f}% effective tax rate
-            - **Profit Conversion**: {(financials['PAT']/financials['PBT']).mean()*100:.1f}% PBT to PAT conversion
+            - **Profit Conversion**: {conversion_ratio * 100:.1f}% PBT to PAT conversion
             - **Growth Consistency**: {sum(financials['EPS Growth %'] > 0)} years of positive EPS growth
             """)
 
